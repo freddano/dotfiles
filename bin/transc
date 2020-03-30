@@ -1,0 +1,11 @@
+#!/bin/bash
+
+unset LIBVA_DRIVER_NAME;
+for i in /dev/dri/renderD12*; do 
+	vainfo --display drm --device $i | grep Intel; 
+		if [ $? == 0 ]; 
+		then DEVICE=$i; echo $DEVICE; 
+		fi; 
+	done
+
+ffmpeg -hwaccel vaapi -hwaccel_device $DEVICE -hwaccel_output_format vaapi -i "$1" -ss "$2" -t "$3" -map 0:0 -map 0:2 -c:v h264_vaapi -b:v 3000k -maxrate 4000k -c:a copy "$4"

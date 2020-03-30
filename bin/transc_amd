@@ -1,0 +1,27 @@
+#!/bin/bash
+
+unset LIBVA_DRIVER_NAME;
+for i in /dev/dri/renderD12*; do 
+	vainfo --display drm --device $i | grep Radeon; 
+		if [ $? == 0 ]; 
+		then A_DEVICE=$i; echo $A_DEVICE; 
+		fi; 
+	done
+
+for i in /dev/dri/renderD12*; do 
+	vainfo --display drm --device $i | grep Intel; 
+		if [ $? == 0 ]; 
+		then I_DEVICE=$i; echo $I_DEVICE; 
+		fi; 
+	done
+
+
+# ffmpeg -hwaccel vaapi -hwaccel_device "$DEVICE" -i "$1" -c:v libx264 "$2"
+# ffmpeg -hwaccel vaapi -hwaccel_device $I_DEVICE -hwaccel_output_format vaapi -i "$1" -ss "$2" -t "$3" -map 0:0 -map 0:2 -c:v h264_vaapi -b:v 3000k -maxrate 4000k -c:a copy "$4"
+
+#ffmpeg -init_hw_device vaapi=decdev:"$A_DEVICE" -init_hw_device vaapi=encdev:"$I_DEVICE" -hwaccel vaapi -hwaccel_device decdev -hwaccel_output_format vaapi -i "$1"\
+# -filter_hw_device encdev -vf 'hwdownload,format=nv12,hwupload' -c:v h264_vaapi "$2"
+
+# ffmpeg -hwaccel vaapi -hwaccel_device $I_DEVICE -hwaccel_output_format vaapi -i "$1" -map 0:0 -map 0:2 -filter:v 'sharpness_vaapi' -c:v h264_vaapi -b:v 2700k -maxrate 3700k -c:a copy "$2"
+# ffmpeg -hwaccel vaapi -hwaccel_device $I_DEVICE -hwaccel_output_format vaapi -i "$1" -ss "$2" -t "$3" -map 0:0 -map 0:2 -filter:v 'sharpness_vaapi' -c:v h264_vaapi -level:v 3 -qp 30 -c:a copy "$4"
+ffmpeg -hwaccel vaapi -hwaccel_device $I_DEVICE -hwaccel_output_format vaapi -i "$1" -ss "$2" -t "$3" -map 0:0 -map 0:2 -filter:v 'sharpness_vaapi' -c:v h264_vaapi -b:v 2750k -c:a copy "$4"
